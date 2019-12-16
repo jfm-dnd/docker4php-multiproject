@@ -1,0 +1,22 @@
+version: '3'
+
+services:
+  traefik:
+    image: traefik:v2.0
+    command: --api.insecure=true --providers.docker
+    networks:
+    - site1
+    - site2
+    ports:
+    - '80:80'
+    - '8080:8080'
+    volumes:
+    - /var/run/docker.sock:/var/run/docker.sock
+
+networks:
+  site1:
+    external:
+      name: site1_default
+  site1:
+    external:
+      name: site2_default
