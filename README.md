@@ -2,7 +2,7 @@
 
 Après avoir passé de longues heures à configurer un environnement multi-projets avec Docker, il m'a semblé intéressant de partager cette expérience.  
 
-La description ci-après est basée sur les ressources mises à disposition par https://github.com/wodby/docker4php et les longues recherches qui seront mentionnées.  
+La description ci-après est basée sur les ressources mises à disposition par https://github.com/wodby/docker4php et des recherches mentionnées dans le texte.  
 L'[installation de Docker](https://hub.docker.com/) est bien entendu un pré-requis.
 
 ## Structure pas à pas
@@ -16,14 +16,14 @@ Tout d'abord, télécharger la [dernière version stable de Docker4php](https://
 |--| docker-sync.yml
 |--| traefik.yml
 ```
-
+[Version 1.5.12](https://github.com/wodby/docker4php/releases/tag/1.5.12) utilisée cet exemple.  
 À ce stade il est possible de lancer la commande suivante depuis le dossier docker4php :
 
 ```
 docker-compose up -d
 ```
 
-Par défaut, nginx pointe vers le dossier `/public`, donc penser à le créer et y ajouter un `index.php`. 
+Par défaut, **nginx** pointe vers le dossier `/public`, donc penser à le créer et y ajouter un `index.php`. 
 
 ```
 |- docker4php
@@ -34,14 +34,14 @@ Par défaut, nginx pointe vers le dossier `/public`, donc penser à le créer et
 |--| public
 |--|--| index.php
 ```
-Le site est à présent accessible à http://php.docker.localhost:8000 (url du projet, verisons php, etc. sont modifiables via le fichier .env).  
+Le site est à présent accessible à http://php.docker.localhost:8000. les paramètres du projet (nom, url, versions php) sont modifiables via le fichier .env.  
 Pour plus d'infos sur la configuration : https://github.com/wodby/docker4php et https://wodby.com/docs/stacks/php/local
 
-Cette configuration peut être répétée pour chacun de vos projets. Se posera alors le problème du port (8000 par défaut) utilisé par traefik qu'il faudra penser à modifier via les fichiers docker-compose.yml si vous lancez plusieurs projets en même temps.  
+Cette configuration peut être répétée pour chacun de vos projets. Se posera alors le problème du port (8000 par défaut) utilisé par traefik qu'il faudra penser à modifier via les fichiers docker-compose.yml si vous souhaitez lancer plusieurs projets en même temps.  
 
-### Heureusement il y a traefik.yml
+### Heureusement il y a traefik
 
-Pour répondre à cette problématique, voici une autre structure possible que docker4php nous propose (https://github.com/wodby/docker4drupal/issues/124)
+Pour répondre à cette problématique, voici une autre structure possible que docker4php nous propose (https://github.com/wodby/docker4drupal/issues/124).
 
 ````
 |- docker4php
@@ -56,10 +56,11 @@ Pour répondre à cette problématique, voici une autre structure possible que d
 |--|---| public
 ...
 ````
+Chaque projet aura ainsi sa propre configuration via les fichiers docker-compose.yml et .env.
 
-#### traefik.yml
+#### Fichier traefik.yml en racine
 
-Comme très bien expliqué ici https://github.com/wodby/php-docs/blob/master/docs/local/multiple-projects.md, voici le fichier traefik.yml modifié et correspondant à la structure donnée en exemple ci-dessus.
+Comme très bien expliqué dans la doc https://github.com/wodby/php-docs/blob/master/docs/local/multiple-projects.md, voici le fichier traefik.yml modifié et correspondant à la structure donnée en exemple ci-dessus.
 
 ```
 version: '3'
@@ -86,20 +87,17 @@ networks:
       name: site2_default
 ```
 
-Chaque projet aura sa propre configuration via les fichiers docker-compose.yml et .env.
-
 *IMPORTANT*
 
 - Vérifier l'unicité des url définies via la variable PROJECT_BASE_URL (fichier .env)
 - Commenter la section traefik de chaque fichier docker-compose.yml
 
 Étape suivante :  
-Depuis chaque sous-répertoire site1,site2, etc., lancer la commande `docker-compose up -d`
+Depuis chaque sous-répertoire (site1 et site2 dans l'exemple), lancer la commande `docker-compose up -d`.
  
 ```
 site1 $ docker-compose up -d
 site2 $ docker-compose up -d
-...
 ```
 
 Puis, depuis le répertoire parent (docker4php dans notre exemple) :
@@ -108,30 +106,32 @@ Puis, depuis le répertoire parent (docker4php dans notre exemple) :
 docker4php $ docker-compose -f traefik.yml up -d
 ```
 
-Cette dernière commande ouvre le port 80 et donne accès aux sous-projets http://site1.docker.localhost, http://site2.docker.localhost, etc.
+Cette dernière commande ouvre le port 80 et donne accès aux sous-projets http://site1.docker.localhost et http://site2.docker.localhost.
 Les différents services fonctionnent ensuite normalement.
 Pour phpmyadmin par exemple :  
-http://pma.site1.docker.localhost, http://pma.site2.docker.localhost, etc.
+http://pma.site1.docker.localhost, http://pma.site2.docker.localhost.
 
 ### Plus loin dans la configuration
 #### Phpmyadmin - privileges
-Par défaut, l'accès au phpmyadmin est configuré avec un identifiant USER ne donnant pas accès à la création de bases de données.
+Par défaut, l'accès au phpmyadmin est configuré avec un identifiant - USER - ne donnant pas accès à certaines fonctionnalités comme la création de bases de données notamment.
 
 ```
-PMA_USER: $DB_USER
-PMA_PASSWORD: $DB_PASSWORD
+pma:
+  environment:
+    PMA_USER: $DB_USER
+    PMA_PASSWORD: $DB_PASSWORD
 ```
 
 Obtenez les privilèges root comme suit :
 
 ```
 pma:
-image: phpmyadmin/phpmyadmin
-container_name: "${PROJECT_NAME}_pma"
-environment:
-  PMA_HOST: $DB_HOST
-  PMA_USER: root
-  PMA_PASSWORD: $DB_ROOT_PASSWORD
+  image: phpmyadmin/phpmyadmin
+  container_name: "${PROJECT_NAME}_pma"
+  environment:
+    PMA_HOST: $DB_HOST
+    PMA_USER: root
+    PMA_PASSWORD: $DB_ROOT_PASSWORD
 ```
 
 #### php.ini pour Phpmyadmin - upload_max_filesize
@@ -156,7 +156,7 @@ Voici une solution pour surcharger le fichier php.ini de pma. Ajouter `./php-ini
       - ./php-ini/php.ini:/usr/local/etc/php/php.ini
 ```
 Créer un répertoire /php-ini au même niveau que le docker-compose dans lequel vous placerez un fichier php.ini.
-La structure ressemble à présent à ça :
+La structure ressemble à présent à ceci :
 
 ````
 |- docker4php
@@ -173,17 +173,16 @@ La structure ressemble à présent à ça :
 |--|---| php-ini
 |--|---|--| php.ini
 |--|---| public
-...
 ````
 
-Ajouter vos configurations au fichier php.ini, exemple :
+Ajouter les configurations au fichier php.ini, exemple :
 
 ```
 post_max_size=400M
 ```
 La modification sera prise en compte au prochain redémarrage `site1 $ docker-compose restart`.
 
-Le fichier php.ini peut également servir pour surcharger php en ajoutant la ligne `PHP_INI_SCAN_DIR: "/usr/local/etc/php/custom.d:/usr/local/etc/php/conf.d"`
+Le fichier php.ini ainsi créé peut également servir pour surcharger php en ajoutant la ligne `PHP_INI_SCAN_DIR: "/usr/local/etc/php/custom.d:/usr/local/etc/php/conf.d"`
 ```
   php:
     image: wodby/php:$PHP_TAG
@@ -198,15 +197,16 @@ Le fichier php.ini peut également servir pour surcharger php en ajoutant la lig
       PHP_FPM_GROUP: wodby
       PHP_INI_SCAN_DIR: "/usr/local/etc/php/custom.d:/usr/local/etc/php/conf.d"
 ```
-
+Pour les explications sur le chemin *PHP_INI_SCAN_DIR*, je vous invite à voir cet article https://sheershoff.ru/custom-php-ini-docker-php-docker-compose-config/.
 #### .htaccess
 
-Ngninx n'autorise pas l'utilisation d'un fichier .htaccess. Il faudra donc activer apache via le fichier docker-compose en dé-commantant la section correspondante.
+Ngninx n'autorise pas l'utilisation d'un fichier .htaccess. Pour cela il est possible activer apache via le fichier docker-compose en dé-commantant la section correspondante.
 Pour les utilisateurs Mac, utilisez plutôt `- ./:/var/www/html:cached` afin d'avoir les modifications en temps réel (https://wodby.com/docs/stacks/php/local/#docker-for-mac).
 
 #### Navigateurs
 
 Enfin, penser à déclarer les noms de domaine dans l'environnement virtuel si vous voulez accéder aux projets avec d'autres navigateurs que Chrome.
+Exemple sur Mac :
 
 ```bash
 sudo pico /etc/hosts
@@ -215,9 +215,8 @@ sudo pico /etc/hosts
 ```
 127.0.0.1 site1.docker.localhost
 127.0.0.1 www.site1.docker.localhost
-...
 ```
 
-Un exemple de tout ça est disponible sur ce dépôt.  
+La config en exemple est disponible sur ce dépôt dans le répertoire docker4php.  
 N'hésitez pas à me laisser vos commentaires et remarques. Enjoy :)
 
