@@ -16,7 +16,7 @@ Tout d'abord, télécharger la [dernière version stable de Docker4php](https://
 |--| docker-sync.yml
 |--| traefik.yml
 ```
-[Version 1.5.12](https://github.com/wodby/docker4php/releases/tag/1.5.12) utilisée cet exemple.  
+[Version 1.5.12](https://github.com/wodby/docker4php/releases/tag/1.5.12) utilisée sur cet exemple.  
 À ce stade il est possible de lancer la commande suivante depuis le dossier docker4php :
 
 ```
@@ -35,7 +35,7 @@ Par défaut, **nginx** pointe vers le dossier `/public`, donc penser à le crée
 |--|--| index.php
 ```
 Le site est à présent accessible à http://php.docker.localhost:8000. les paramètres du projet (nom, url, versions php) sont modifiables via le fichier .env.  
-Pour plus d'infos sur la configuration : https://github.com/wodby/docker4php et https://wodby.com/docs/stacks/php/local
+Pour plus d'infos sur la configuration : https://github.com/wodby/docker4php et https://wodby.com/docs/stacks/php/local.
 
 Cette configuration peut être répétée pour chacun de vos projets. Se posera alors le problème du port (8000 par défaut) utilisé par traefik qu'il faudra penser à modifier via les fichiers docker-compose.yml si vous souhaitez lancer plusieurs projets en même temps.  
 
@@ -200,7 +200,7 @@ Le fichier php.ini ainsi créé peut également servir pour surcharger php en aj
 Pour les explications sur le chemin *PHP_INI_SCAN_DIR*, je vous invite à voir cet article https://sheershoff.ru/custom-php-ini-docker-php-docker-compose-config/.
 #### .htaccess
 
-Ngninx n'autorise pas l'utilisation d'un fichier .htaccess. Pour cela il est possible activer apache via le fichier docker-compose en dé-commantant la section correspondante.
+Ngninx n'autorise pas l'utilisation d'un fichier .htaccess. Pour cela il est possible d'activer apache via le fichier docker-compose en dé-commantant la section correspondante.
 Pour les utilisateurs Mac, utilisez plutôt `- ./:/var/www/html:cached` afin d'avoir les modifications en temps réel (https://wodby.com/docs/stacks/php/local/#docker-for-mac).
 
 #### Navigateurs
