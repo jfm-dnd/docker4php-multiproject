@@ -200,7 +200,7 @@ Le fichier php.ini ainsi créé peut également servir pour surcharger php en aj
 Pour les explications sur le chemin *PHP_INI_SCAN_DIR*, je vous invite à voir cet article https://sheershoff.ru/custom-php-ini-docker-php-docker-compose-config/.
 #### .htaccess
 
-Ngninx n'autorise pas l'utilisation d'un fichier .htaccess. Pour cela il est possible d'activer apache via le fichier docker-compose en dé-commantant la section correspondante.
+Ngninx n'autorise pas l'utilisation d'un fichier .htaccess. Pour cela il est possible d'activer apache via le fichier docker-compose en décommentant la section correspondante.
 Pour les utilisateurs Mac, utilisez plutôt `- ./:/var/www/html:cached` afin d'avoir les modifications en temps réel (https://wodby.com/docs/stacks/php/local/#docker-for-mac).
 
 #### Navigateurs
